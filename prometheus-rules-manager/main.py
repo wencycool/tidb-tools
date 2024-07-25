@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-import logging
 import pathlib
 import shutil
 import yaml
 from datetime import datetime
 from pkg.rules_manager import PrometheusRulesManager, AlertRuleNotFoundException, PrometheusRulesManagerException
 from pkg.logger import Logger
-
-# 在Exception捕获异常后，可以通过traceback.format_exc()来打印异常的堆栈信息
 
 logger = Logger(__name__)
 
