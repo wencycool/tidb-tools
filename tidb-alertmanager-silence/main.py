@@ -51,7 +51,7 @@ def main():
                     log.info(f"Cluster:[{clustername}],delete all silence")
                     silences = sm.list_silences()
                     if len(silences) != 0:
-                        log.info(f"Delete since loop...")
+                        log.info(f"Delete silence loop...")
                     for silence in silences:
                         silence_id = silence.get("id")
                         sm.delete_silence(silence_id)

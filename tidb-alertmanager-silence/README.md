@@ -75,13 +75,13 @@ case5：删除某个集群的所有告警静默
 2024-07-28 20:15:59,248 - root-main.py[line:65] - ERROR - Cluster tidb-test2 error: HTTPConnectionPool(host='192.168.31.100', port=9093): Max retries exceeded with url: /api/v2/silences (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f166a249280>: Failed to establish a new connection: [Errno 113] No route to host'))
 2024-07-28 20:15:59,259 - root-main.py[line:39] - INFO - Cluster:[tidb-test1],alertmanager url: [192.168.31.201:9193]
 2024-07-28 20:15:59,259 - root-main.py[line:51] - INFO - Cluster:[tidb-test1],delete all silence
-2024-07-28 20:15:59,261 - root-main.py[line:54] - INFO - Delete since loop...
+2024-07-28 20:15:59,261 - root-main.py[line:54] - INFO - Delete silence loop...
 2024-07-28 20:15:59,263 - root-main.py[line:58] - INFO -     Silence deleted,silence id: e379cb3c-10d7-43c2-a647-802b0de28188
 2024-07-28 20:15:59,265 - root-main.py[line:58] - INFO -     Silence deleted,silence id: c203234f-d58c-4128-b2f7-1d789db26efb
 2024-07-28 20:15:59,266 - root-main.py[line:59] - INFO - Cluster:[tidb-test1],all silence deleted success!
 2024-07-28 20:15:59,276 - root-main.py[line:39] - INFO - Cluster:[tidb-test],alertmanager url: [192.168.31.201:9093]
 2024-07-28 20:15:59,277 - root-main.py[line:51] - INFO - Cluster:[tidb-test],delete all silence
-2024-07-28 20:15:59,279 - root-main.py[line:54] - INFO - Delete since loop...
+2024-07-28 20:15:59,279 - root-main.py[line:54] - INFO - Delete silence loop...
 2024-07-28 20:15:59,281 - root-main.py[line:58] - INFO -     Silence deleted,silence id: 365485eb-1d8d-453f-af96-e75fbaf1bbe3
 2024-07-28 20:15:59,282 - root-main.py[line:58] - INFO -     Silence deleted,silence id: 4d6f2f97-e550-4f5e-b26b-07487ac7e711
 2024-07-28 20:15:59,284 - root-main.py[line:58] - INFO -     Silence deleted,silence id: 8a41524e-f855-4d45-9ae9-1a112d96db28
