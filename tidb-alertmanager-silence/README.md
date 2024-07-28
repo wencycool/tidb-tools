@@ -14,12 +14,17 @@ TiDB集群中的alertmanager会定时检查集群中的各种告警，如果有�
 - 按照本地时区设置即可，会自动转换为UTC时间
 
 使用方法：
-case1：静默某个集群的所有告警
+case1：静默所有集群的所有告警
+静默本地时间2024-07-28 20:00:00到2024-07-28 23:00:00的所有告警
 ```text
-(venv) [tidb@host0 tidb_silence]$ python main.py -cs tidb-test create --startsAt "2024-07-28-20:00:00" --endsAt "2024-07-28-23:00:00"
-2024-07-28 20:09:46,523 - root-main.py[line:31] - INFO - 集群名称: ['tidb-test']
-2024-07-28 20:09:46,534 - root-main.py[line:39] - INFO - Cluster:[tidb-test],alertmanager url: [192.168.31.201:9093]
-2024-07-28 20:09:46,551 - root-main.py[line:45] - INFO - Cluster:[tidb-test],silence id: [1edb0643-ca86-4b6a-b040-f79b4993ed7a],silence created success!
+(venv) [tidb@host0 tidb_silence]$ python main.py create --startsAt "2024-07-28-20:00:00" --endsAt "2024-07-28-23:00:00" 
+2024-07-28 20:21:14,515 - root-main.py[line:27] - INFO - 将操作所有集群
+2024-07-28 20:21:14,534 - root-main.py[line:39] - INFO - Cluster:[tidb-test2],alertmanager url: [192.168.31.100:9093]
+2024-07-28 20:21:17,648 - root-main.py[line:65] - ERROR - Cluster tidb-test2 error: HTTPConnectionPool(host='192.168.31.100', port=9093): Max retries exceeded with url: /api/v2/silences (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f93edc4e070>: Failed to establish a new connection: [Errno 113] No route to host'))
+2024-07-28 20:21:17,659 - root-main.py[line:39] - INFO - Cluster:[tidb-test1],alertmanager url: [192.168.31.201:9193]
+2024-07-28 20:21:17,661 - root-main.py[line:45] - INFO - Cluster:[tidb-test1],silence id: [adc93904-1777-43fa-8f3b-4afa7ed59068],silence created success!
+2024-07-28 20:21:17,667 - root-main.py[line:39] - INFO - Cluster:[tidb-test],alertmanager url: [192.168.31.201:9093]
+2024-07-28 20:21:17,669 - root-main.py[line:45] - INFO - Cluster:[tidb-test],silence id: [8bd322a9-e045-4afa-a870-38bdb84a3991],silence created success!
 ```
 case2：静默tiup上所有集群的某个告警
 ```text
