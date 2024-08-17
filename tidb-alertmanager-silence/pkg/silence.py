@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 import json
 from urllib.parse import urljoin
+from matcher import Matcher, SilenceType
 
 # 创建silence类型，目前支持整个集群的silence或者某一个组件的silence，即某一个组件如果宕机后不再发送告警
 
@@ -39,14 +40,13 @@ class SilenceManager:
         return {
             "Content-Type": "application/json",
         }
-
-    def __generate_data(self, alertname, startsAt=datetime.now(),
+    def __generate_data(self, matcher, startsAt=datetime.now(),
                         endsAt=datetime.now() + timedelta(minutes=30), createdBy='system',
                         comment='auto silence'):
         """
         生成data对象
-        :param alertname:
-        :type alertname: str
+        :param matcher: 匹配规则
+        :type matcher: Matcher
         :param startsAt:
         :type startsAt: datetime
         :param endsAt:
@@ -60,48 +60,48 @@ class SilenceManager:
         # 将当前时间转为UTC时间
         startsAt = local2utc(startsAt)
         endsAt = local2utc(endsAt)
-        if alertname is None or len(alertname.strip()) == 0:
-            data = {
-                "matchers": [
-                    {
-                        "name": "alertname",
-                        "value": ".+",
-                        "isRegex": True,
-                    }
-                ],
-                "startsAt": startsAt.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-                "endsAt": endsAt.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-                "createdBy": createdBy,
-                "comment": comment,
-            }
-        else:
-            data = {
-                "matchers": [
-                    {
-                        "name": "alertname",
-                        "value": alertname,
-                        "isRegex": True,
-                    }
-                ],
-                "startsAt": startsAt.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-                "endsAt": endsAt.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-                "createdBy": createdBy,
-                "comment": comment,
-            }
+
+        data = {
+            "matchers": matcher.matchers,
+            "startsAt": startsAt.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "endsAt": endsAt.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "createdBy": createdBy,
+            "comment": comment,
+        }
         return json.dumps(data)
 
-    def create_silence(self, alertname, startsAt, endsAt):
+    def create_silence(self, tidb_roles, startsAt, endsAt):
         """
         创建silence
-        :param alertname:
-        :type alertname: list(str)
+        :param tidb_roles: TiDB集群中的组件名称，如：["tidb", "pd", "tikv","pump","drainer"]，目前值支持整个集群的silence
+        :type tidb_roles: list
         :param startsAt:
         :type startsAt: datetime
         :param endsAt:
         :type endsAt: datetime
         :rtype: dict
         """
-        data = self.__generate_data(alertname, startsAt, endsAt)
+        matcher = Matcher()
+        if not tidb_roles:
+            matcher.add(SilenceType.cluster)
+        else:
+            for role in tidb_roles:
+                role = role.lower()
+                if role == "tidb":
+                    matcher.add(SilenceType.tidb)
+                elif role == "tikv":
+                    matcher.add(SilenceType.tikv)
+                elif role == "pd":
+                    matcher.add(SilenceType.pd)
+                elif role == "tiflash":
+                    matcher.add(SilenceType.tiflash)
+                elif role == "pump":
+                    matcher.add(SilenceType.pump)
+                elif role == "drainer":
+                    matcher.add(SilenceType.drainer)
+                else:
+                    raise ValueError("Invalid role type")
+        data = self.__generate_data(matcher, startsAt, endsAt)
         url = urljoin(self.url, "api/v2/silences")
         response = requests.post(url, headers=self.__headers(), data=data,
                                  timeout=self.timeout)

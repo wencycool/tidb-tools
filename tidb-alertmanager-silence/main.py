@@ -10,7 +10,7 @@ def main():
     parser.add_argument("-cs", "--clusters", help="集群名称列表，用逗号分隔，不填写代表当前tiup上所有集群", required=False)
     sub_parser = parser.add_subparsers(dest="action", help="操作类型")
     create_parser = sub_parser.add_parser("create", help="创建silence")
-    create_parser.add_argument("--alertname", help="告警名称，如果不设置代表屏蔽当前集群所有告警", required=False)
+    create_parser.add_argument("--roles", help="tidb节点类型名称列表，以逗号分隔（如：\"alertmanager,grafana,pd,tidb\"），如果不设置代表屏蔽当前集群所有告警", required=False)
     create_parser.add_argument("--startsAt", help="开始时间，时间格式为:2024-07-20-18:00:00", required=True)
     create_parser.add_argument("--endsAt", help="结束时间，时间格式为:2024-07-20-18:30:00", required=True)
 
@@ -23,6 +23,8 @@ def main():
     log.basicConfig(filename=None, level=log.INFO,
                     format='%(asctime)s - %(name)s-%(filename)s[line:%(lineno)d] - %(levelname)s - %(message)s')
 
+
+    roles = [role.strip() for role in args.roles.split(",")] if args.roles else []
     if not args.clusters:
         log.info("将操作所有集群")
         clusters = get_clusternames()
@@ -41,7 +43,7 @@ def main():
             if args.action == "create":
                 startsAt = datetime.strptime(args.startsAt, "%Y-%m-%d-%H:%M:%S")
                 endsAt = datetime.strptime(args.endsAt, "%Y-%m-%d-%H:%M:%S")
-                silenceid = sm.create_silence(args.alertname, startsAt, endsAt)
+                silenceid = sm.create_silence(roles, startsAt, endsAt)
                 log.info(f"Cluster:[{clustername}],silence id: [{silenceid}],silence created success!")
             elif args.action == "delete":
                 if args.silenceid:

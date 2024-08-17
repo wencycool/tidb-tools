@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="ad25e44a-139f-4526-a143-363b30501c8c" name="192.168.31.200">
+        <fileTransfer rootFolder="/home/tidb" accessType="SFTP" host="192.168.31.200" port="22" sshConfigId="333cfe62-68ba-4948-9dfa-775367ce219d" sshConfig="tidb@192.168.31.200:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
