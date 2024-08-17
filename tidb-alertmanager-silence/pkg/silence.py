@@ -87,7 +87,9 @@ class SilenceManager:
         else:
             for role in tidb_roles:
                 role = role.lower()
-                if role == "tidb":
+                if role == "cluster":
+                    matcher.add(SilenceType.cluster)
+                elif role == "tidb":
                     matcher.add(SilenceType.tidb)
                 elif role == "tikv":
                     matcher.add(SilenceType.tikv)
