@@ -5,6 +5,8 @@ import pytz
 import json
 from urllib.parse import urljoin
 
+# 创建silence类型，目前支持整个集群的silence或者某一个组件的silence，即某一个组件如果宕机后不再发送告警
+
 
 # 创建silence Exception
 class SilenceError(Exception):
