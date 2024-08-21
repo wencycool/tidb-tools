@@ -6,10 +6,14 @@ class SilenceType(Enum):
     定义支持的silence类型，每种类型对应一系列告警名称（抑制这些告警后即可避免该类型节点的告警），用于生成silence的matchers对象
     """
     cluster = [".+"]  # 利用正则表达式匹配所有告警，表示整个集群都不进行告警
-    pump = ["Pump_server_is_down", "binlog_drainer_checkpoint_tso_no_change_for_1m"]
+    pump = ["Pump_server_is_down", "binlog_drainer_checkpoint_tso_no_change_for.+"]
     drainer = ["Drainer_server_is_down"]
     tidb = ["TiDB_server_is_down", "TiDB_monitor_keep_alive", "TiDB_node_restart"]
-    # todo 添加更多的告警名称
+    tikv = ["TiKV_server_report_failure_msg_total", "PD_cluster_lost_connect_tikv_nums",
+            "PD_pending_peer_region_count", "TiKV_server_is_down", "TiDB_monitor_keep_alive",
+            "tidb_tikvclient_backoff_seconds_count", "TiKV_node_restart"]
+    tiflash = ["TiFlash_server_is_down", "PD_cluster_lost_connect_tikv_nums"]  # tiflash没有 "TiFlash_node_restart" 告警
+    pd = ["PD_server_is_down", "PD_leader_change"]
 
 
 class Matcher:
