@@ -126,6 +126,7 @@ class SilenceManager:
                     matcher.add(SilenceType.drainer)
                 else:
                     raise ValueError("Invalid role type")
+        # fixme 这里的matchers是多个指标并且的意思，需要修改为多个告警抑制
         data = self.__generate_data(matcher, startsAt, endsAt)
         url = urljoin(self.url, "api/v2/silences")
         response = requests.post(url, headers=self.__headers(), data=data,
