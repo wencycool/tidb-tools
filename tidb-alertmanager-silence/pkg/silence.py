@@ -179,6 +179,3 @@ class SilenceManager:
         """
         for silence in self.list_silences():
             self.delete_silence(silence.get("id"))
-
-git config --global user.name "你的用户名"
-git config --global user.email "你的电子邮件地址"
