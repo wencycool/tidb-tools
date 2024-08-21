@@ -1,10 +1,20 @@
 # coding=utf8
 import requests
 from datetime import datetime, timedelta
-import pytz
+import sys
 import json
 from urllib.parse import urljoin
-from matcher import Matcher, SilenceType
+
+from .matcher import Matcher, SilenceType
+
+# coding=utf8
+import requests
+from datetime import datetime, timedelta
+import sys
+import json
+from urllib.parse import urljoin
+
+from .matcher import Matcher, SilenceType
 
 # 创建silence类型，目前支持整个集群的silence或者某一个组件的silence，即某一个组件如果宕机后不再发送告警
 
@@ -18,14 +28,28 @@ class SilenceError(Exception):
 def local2utc(local_st):
     """
     将本地时间转换为UTC时间
-    :param local_st:
-    :type local_st: datetime
-    :rtype: datetime
+    Args:
+        local_st (datetime): 本地时间
+    Returns:
+        datetime: 转换后的UTC时间
     """
-    local_timezone = pytz.timezone("Asia/Shanghai")
-    local_dt = local_timezone.localize(local_st)
-    utc_dt = local_dt.astimezone(pytz.utc)
-    return utc_dt
+    # 如果当前版本是3.9以及以上则直接用自带的zoneinfo包，否则使用backports.zoneinfo
+    if sys.version_info < (3, 9):
+        import pytz
+        local_timezone = pytz.timezone("Asia/Shanghai")
+        local_dt = local_timezone.localize(local_st)
+        utc_dt = local_dt.astimezone(pytz.utc)
+        return utc_dt
+    else:
+        try:
+            from zoneinfo import ZoneInfo
+            local_timezone = ZoneInfo("Asia/Shanghai")
+            local_dt = local_st.replace(tzinfo=local_timezone)
+            utc_dt = local_dt.astimezone(ZoneInfo("UTC"))
+            return utc_dt
+        except ImportError:
+            raise ImportError("Please install backports.zoneinfo")
+
 
 
 class SilenceManager:
@@ -87,7 +111,9 @@ class SilenceManager:
         else:
             for role in tidb_roles:
                 role = role.lower()
-                if role == "tidb":
+                if role == "cluster":
+                    matcher.add(SilenceType.cluster)
+                elif role == "tidb":
                     matcher.add(SilenceType.tidb)
                 elif role == "tikv":
                     matcher.add(SilenceType.tikv)
@@ -154,3 +180,6 @@ class SilenceManager:
         """
         for silence in self.list_silences():
             self.delete_silence(silence.get("id"))
+
+git config --global user.name "你的用户名"
+git config --global user.email "你的电子邮件地址"

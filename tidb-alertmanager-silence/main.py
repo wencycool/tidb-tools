@@ -8,9 +8,9 @@ import logging as log
 def main():
     parser = argparse.ArgumentParser(description="Alertmanager Silence")
     parser.add_argument("-cs", "--clusters", help="集群名称列表，用逗号分隔，不填写代表当前tiup上所有集群", required=False)
+    parser.add_argument("--roles", help="tidb节点类型名称列表，以逗号分隔（如：\"tidb,pd,tikv\"），如果不设置代表屏蔽当前集群所有告警", required=False)
     sub_parser = parser.add_subparsers(dest="action", help="操作类型")
     create_parser = sub_parser.add_parser("create", help="创建silence")
-    create_parser.add_argument("--roles", help="tidb节点类型名称列表，以逗号分隔（如：\"alertmanager,grafana,pd,tidb\"），如果不设置代表屏蔽当前集群所有告警", required=False)
     create_parser.add_argument("--startsAt", help="开始时间，时间格式为:2024-07-20-18:00:00", required=True)
     create_parser.add_argument("--endsAt", help="结束时间，时间格式为:2024-07-20-18:30:00", required=True)
 
@@ -23,8 +23,10 @@ def main():
     log.basicConfig(filename=None, level=log.INFO,
                     format='%(asctime)s - %(name)s-%(filename)s[line:%(lineno)d] - %(levelname)s - %(message)s')
 
-
-    roles = [role.strip() for role in args.roles.split(",")] if args.roles else []
+    if not args.roles:
+        roles = []
+    else:
+        roles = [role.strip() for role in args.roles.split(",")]
     if not args.clusters:
         log.info("将操作所有集群")
         clusters = get_clusternames()
