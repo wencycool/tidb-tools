@@ -51,7 +51,6 @@ def local2utc(local_st):
             raise ImportError("Please install backports.zoneinfo")
 
 
-
 class SilenceManager:
     """
     Silence类，仅仅支持整个集群的silence或者某一个alertname的silence，alertname支持正则表达式形式（golang的正则形式）
