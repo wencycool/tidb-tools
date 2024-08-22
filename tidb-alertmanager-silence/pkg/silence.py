@@ -24,23 +24,11 @@ def local2utc(local_st):
     Returns:
         datetime: 转换后的UTC时间
     """
-    # 如果当前版本是3.9以及以上则直接用自带的zoneinfo包，否则使用backports.zoneinfo
-    if sys.version_info < (3, 9):
-        import pytz
-        local_timezone = pytz.timezone("Asia/Shanghai")
-        local_dt = local_timezone.localize(local_st)
-        utc_dt = local_dt.astimezone(pytz.utc)
-        return utc_dt
-    else:
-        try:
-            from zoneinfo import ZoneInfo
-            local_timezone = ZoneInfo("Asia/Shanghai")
-            local_dt = local_st.replace(tzinfo=local_timezone)
-            utc_dt = local_dt.astimezone(ZoneInfo("UTC"))
-            return utc_dt
-        except ImportError:
-            raise ImportError("Please install backports.zoneinfo")
-
+    from dateutil import tz
+    local_tz = tz.gettz("Asia/Shanghai")
+    local_st = local_st.replace(tzinfo=local_tz)
+    utc_st = local_st.astimezone(tz.tzutc())
+    return utc_st
 
 class SilenceManager:
     """
