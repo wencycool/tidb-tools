@@ -45,12 +45,12 @@ def main():
             if args.action == "create":
                 startsAt = datetime.strptime(args.startsAt, "%Y-%m-%d-%H:%M:%S")
                 endsAt = datetime.strptime(args.endsAt, "%Y-%m-%d-%H:%M:%S")
-                silenceid = sm.create_silence(roles, startsAt, endsAt)
-                log.info(f"Cluster:[{clustername}],silence id: [{silenceid}],silence created success!")
+                silenceids = sm.create_silence(roles, startsAt, endsAt)
+                log.info(f"Cluster:[{clustername}],silence ids: [{','.join(silenceids)}],silence created success!")
             elif args.action == "delete":
                 if args.silenceid:
                     sm.delete_silence(args.silenceid)
-                    log.info(f"Cluster:[{clustername}],silence id: [{args.silenceid}],,silence deleted success!")
+                    log.info(f"Cluster:[{clustername}],silence id: [{args.silenceid}],silence deleted success!")
                 else:
                     log.info(f"Cluster:[{clustername}],delete all silence")
                     silences = sm.list_silences()

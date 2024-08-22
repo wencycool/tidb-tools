@@ -5,16 +5,7 @@ import sys
 import json
 from urllib.parse import urljoin
 
-from .matcher import Matcher, SilenceType
-
-# coding=utf8
-import requests
-from datetime import datetime, timedelta
-import sys
-import json
-from urllib.parse import urljoin
-
-from .matcher import Matcher, SilenceType
+from .matcher import Matcher, SilenceType, split_matchers
 
 # 创建silence类型，目前支持整个集群的silence或者某一个组件的silence，即某一个组件如果宕机后不再发送告警
 
@@ -102,7 +93,7 @@ class SilenceManager:
         :type startsAt: datetime
         :param endsAt:
         :type endsAt: datetime
-        :rtype: dict
+        :rtype: [str]
         """
         matcher = Matcher()
         if not tidb_roles:
@@ -127,14 +118,21 @@ class SilenceManager:
                 else:
                     raise ValueError("Invalid role type")
         # fixme 这里的matchers是多个指标并且的意思，需要修改为多个告警抑制
-        data = self.__generate_data(matcher, startsAt, endsAt)
         url = urljoin(self.url, "api/v2/silences")
-        response = requests.post(url, headers=self.__headers(), data=data,
-                                 timeout=self.timeout)
-        if response.status_code == 200:
-            return dict(json.loads(response.text)).get("silenceID")
-        else:
-            raise SilenceError(response.text)
+        result = []  # silence id列表
+        for each_matcher in split_matchers(matcher):
+            data = self.__generate_data(each_matcher, startsAt, endsAt)
+            response = requests.post(url, headers=self.__headers(), data=data,
+                                     timeout=self.timeout)
+            if response.status_code == 200:
+                # 返回silenceID
+                result.append(dict(json.loads(response.text)).get("silenceID"))
+            else:
+                msg = f"设置静默失败，原因:{response.text}"
+                if result:
+                    msg = msg + f"，已设置静默的Silence列表:{''.join(result)}"
+                raise SilenceError(msg)
+        return result
 
     def list_silences(self):
         """

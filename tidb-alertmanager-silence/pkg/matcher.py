@@ -42,6 +42,20 @@ class Matcher:
                 self.alertnames.append(altername)
         return self
 
+    def add_alertname(self, alertname):
+        """
+        添加alertname，如果alertname已经存在则不添加
+        :type alertname: str
+        """
+        if alertname not in self.alertnames:
+            self.matchers.append({
+                "name": "alertname",
+                "value": alertname,
+                "isRegex": True,
+            })
+            self.alertnames.append(alertname)
+        return self
+
     def to_json(self):
         return {
             "matchers": self.matchers
@@ -49,3 +63,14 @@ class Matcher:
 
     def __str__(self):
         return str(self.to_json())
+
+def split_matchers(matchers):
+    """
+    将matchers对象拆分为多个matcher类型
+    :type matchers: Matcher
+    :rtype: list
+    """
+    result_matchers = []
+    for each_altername in matchers.alertnames:
+       result_matchers.append(Matcher().add_alertname(each_altername))
+    return result_matchers
