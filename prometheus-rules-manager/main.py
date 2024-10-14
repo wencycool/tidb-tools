@@ -60,12 +60,14 @@ def get_tiup_install_dir():
     return install_dir
 
 
-def get_tiup_clusters_rule_dir(cluster_names=None):
+def get_tiup_clusters_rule_dir(cluster_names=None, ignores=None):
     """
     获取tiup集群的规则文件目录，如果指定了cluster_names，则只返回指定集群的规则文件目录，
     一个集群有可能配置了多个监控节点，因此一个集群可能返回多个规则目录
     :param cluster_names: 集群名称列表
     :type cluster_names: list
+    :param ignores: 忽略的集群名称列表
+    :type ignores: list
     :return: {cluster_name: [rule_dir1, rule_dir2, ...]}
     :rtype: dict
     """
@@ -74,6 +76,8 @@ def get_tiup_clusters_rule_dir(cluster_names=None):
     rule_dir_map = {}
     local_clusters = [cluster.name for cluster in search_paths.iterdir() if cluster.is_dir()]
     logger.debug(f"tiup配置文件中找到的集群：{','.join(local_clusters)}")
+    if ignores:
+        local_clusters = list(set(local_clusters) - set(ignores))
     if cluster_names:
         for cluster_name in cluster_names:
             if cluster_name not in local_clusters:
@@ -192,6 +196,7 @@ def main():
     parser.add_argument('-f', '--file', help='prometheus规则文件的路径')
     parser.add_argument('-t', '--tiup', action='store_true', help='使用tiup集群')
     parser.add_argument('-c', '--clusters', help='指定的集群名称，多个集群名称用逗号分隔')
+    parser.add_argument('-i', '--ignore', help='忽略的集群名称，多个集群名称用逗号分隔')
 
     subparsers = parser.add_subparsers(dest='command', required=True)
     append_parser = subparsers.add_parser('append', help='添加一个或多个alert规则')
@@ -229,7 +234,8 @@ def main():
     if args.tiup:
         logger.info("Using tiup clusters")
         clusters = [x.strip() for x in args.clusters.split(',')] if args.clusters else None
-        rule_dir_map = get_tiup_clusters_rule_dir(clusters)
+        ignores = [x.strip() for x in args.egnore.split(',')] if args.egnore else None
+        rule_dir_map = get_tiup_clusters_rule_dir(clusters, ignores)
         if clusters:
             logger.debug(f"Clusters: {','.join(clusters)}")
         else:
