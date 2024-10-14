@@ -234,7 +234,7 @@ def main():
     if args.tiup:
         logger.info("Using tiup clusters")
         clusters = [x.strip() for x in args.clusters.split(',')] if args.clusters else None
-        ignores = [x.strip() for x in args.egnore.split(',')] if args.egnore else None
+        ignores = [x.strip() for x in args.ignore.split(',')] if args.ignore else None
         rule_dir_map = get_tiup_clusters_rule_dir(clusters, ignores)
         if clusters:
             logger.debug(f"Clusters: {','.join(clusters)}")
