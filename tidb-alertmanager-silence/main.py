@@ -7,7 +7,8 @@ import logging as log
 
 def main():
     parser = argparse.ArgumentParser(description="Alertmanager Silence")
-    parser.add_argument("-cs", "--clusters", help="集群名称列表，用逗号分隔，不填写代表当前tiup上所有集群", required=False)
+    parser.add_argument("-c", "--clusters", help="集群名称列表，用逗号分隔，不填写代表当前tiup上所有集群", required=False)
+    parser.add_argument('-i', '--ignore', help='忽略的集群名称，多个集群名称用逗号分隔')
     parser.add_argument("--roles", help="tidb节点类型名称列表，以逗号分隔（如：\"tidb,pd,tikv\"），如果不设置代表屏蔽当前集群所有告警", required=False)
     sub_parser = parser.add_subparsers(dest="action", help="操作类型")
     create_parser = sub_parser.add_parser("create", help="创建silence")
@@ -36,6 +37,11 @@ def main():
         # 校验集群名称是否存在
         if not set(clusters).issubset(set(get_clusternames())):
             log.error(f"集群名称存在错误，请检查集群名称是否正确")
+    # 去掉忽略的集群
+    if args.ignore:
+        ignore_clusters = args.ignore.split(",")
+        clusters = [cluster for cluster in clusters if cluster not in ignore_clusters]
+        log.info(f"忽略的集群: {ignore_clusters}")
     for clustername in clusters:
         try:
             cluster = ClusterInfo(clustername)
