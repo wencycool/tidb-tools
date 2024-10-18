@@ -3,6 +3,7 @@
 import argparse
 import pathlib
 import shutil
+import re
 import yaml
 from datetime import datetime
 from pkg.rules_manager import PrometheusRulesManager, AlertRuleNotFoundException, PrometheusRulesManagerException
@@ -187,6 +188,20 @@ def process_rule_file(manager, command, args):
     return True
 
 
+# 为parser提供字符串分隔函数，用于将逗号分隔的字符串转化为列表
+def comma_separated_strings(string):
+    """
+    用于将逗号分隔的字符串转化为列表，支持连续多个空格，逗号，分号和竖线做分隔符
+    Args:
+        string(str): 逗号分隔的字符串
+
+    Returns:
+        list: 分隔后的列表
+
+    """
+    # 支持连续多个空格，逗号，分号和竖线做分隔符
+    return re.split(r'[,\s;|]+', string)
+
 def main():
     parser = argparse.ArgumentParser(description='修改prometheus的规则文件')
     parser.add_argument('--debug', action='store_true', help='开启debug模式')
@@ -195,8 +210,8 @@ def main():
                         help='备份文件的路径，如果指定该路径，那么该路径下会存放每次修改的前一个版本信息和回退方法')
     parser.add_argument('-f', '--file', help='prometheus规则文件的路径')
     parser.add_argument('-t', '--tiup', action='store_true', help='使用tiup集群')
-    parser.add_argument('-c', '--clusters', help='指定的集群名称，多个集群名称用逗号分隔')
-    parser.add_argument('-i', '--ignore', help='忽略的集群名称，多个集群名称用逗号分隔')
+    parser.add_argument('-c', '--clusters', type=comma_separated_strings, help='指定的集群名称，多个集群名称用逗号分隔')
+    parser.add_argument('-i', '--ignore', type=comma_separated_strings, help='忽略的集群名称，多个集群名称用逗号分隔')
 
     subparsers = parser.add_subparsers(dest='command', required=True)
     append_parser = subparsers.add_parser('append', help='添加一个或多个alert规则')
@@ -233,8 +248,8 @@ def main():
         backup_dir.mkdir(parents=True, exist_ok=True)
     if args.tiup:
         logger.info("Using tiup clusters")
-        clusters = [x.strip() for x in args.clusters.split(',')] if args.clusters else None
-        ignores = [x.strip() for x in args.ignore.split(',')] if args.ignore else None
+        clusters = args.clusters  #[x.strip() for x in args.clusters.split(',')] if args.clusters else None
+        ignores = args.ignore  #[x.strip() for x in args.ignore.split(',')] if args.ignore else None
         rule_dir_map = get_tiup_clusters_rule_dir(clusters, ignores)
         if clusters:
             logger.debug(f"Clusters: {','.join(clusters)}")
