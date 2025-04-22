@@ -1,0 +1,44 @@
+{
+  // 使用Pylance作为Python语言服务器
+  "python.languageServer": "Pylance",
+  
+  // 提高自动完成响应速度
+  "editor.quickSuggestionsDelay": 0,
+  
+  // 配置Python分析
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/prometheus-rules-manager",
+    "${workspaceFolder}/prometheus-rules-manager/pkg"
+  ],
+  
+  // 减少分析的文件数量，专注于工作区文件
+  "python.analysis.diagnosticMode": "workspace",
+  
+  // 启用缓存以提升性能
+  "python.analysis.cacheFolderPath": "${workspaceFolder}/.vscode/.pylance",
+  
+  // 减少自动导入的建议
+  "python.analysis.autoImportCompletions": true,
+  
+  // IntelliSense性能优化
+  "editor.suggest.localityBonus": true,
+  "editor.suggest.shareSuggestSelections": true,
+  
+  // 禁用不必要的功能
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.pyc": true
+  },
+  
+  // 减少编辑器对大量文件的监视
+  "files.watcherExclude": {
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/venv/**": true,
+    "**/.git/**": true
+  }
+}

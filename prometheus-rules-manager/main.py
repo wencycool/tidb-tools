@@ -164,7 +164,7 @@ def check_alert_name_in_rule_dir(rule_dir, alert_name):
     raise AlertRuleNotFoundException(alert_name)
 
 
-def process_rule_file(manager, command, args):
+def process_rule_file(manager:PrometheusRulesManager, command, args):
     """
     处理 Prometheus 规则文件
     :param manager: PrometheusRulesManager 实例

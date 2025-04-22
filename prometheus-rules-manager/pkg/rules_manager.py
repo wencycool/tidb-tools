@@ -16,7 +16,27 @@ class PrometheusRulesManagerException(Exception):
     def __str__(self):
         return 'PrometheusRulesManagerException: %s' % self.args[0]
 
+'''
+rules的yaml文件格式为：
+groups:
+- name: alert.rules
+  rules:
+  - alert: TiDB_schema_error
+    expr: increase(tidb_session_schema_lease_error_total{type="outdated"}[15m]) >
+      0
+    for: 1m
+    labels:
+      env: tidb-test
+      expr: increase(tidb_session_schema_lease_error_total{type="outdated"}[15m])
+        > 0
+      level: emergency
+    annotations:
+      description: 'cluster: tidb-test, instance: {{ $labels.instance }}, values:{{
+        $value }}'
+      summary: TiDB schema error
+      value: '{{ $value }}'
 
+'''
 class PrometheusRulesManager:
     """
     PrometheusRulesManager类用于管理Prometheus的规则文件，可以删除和修改alert规则
@@ -26,6 +46,21 @@ class PrometheusRulesManager:
     def __init__(self, file_path):
         self.file_path = file_path
         self.rules = self.load_rules()
+
+    # 从配置文件中的任意一个rule中获取env属性的值作为集群名称
+    def get_cluster_name(self):
+        """
+        获取集群名称
+        :return: 集群名称
+        :rtype: str
+        """
+        if self.rules.get('groups') and len(self.rules['groups']) > 0:
+            rules = self.rules['groups'][0]['rules']
+            if len(rules) > 0:
+                labels = rules[0].get('labels')
+                if labels and 'env' in labels:
+                    return labels['env']
+        return None
 
     def is_rulefile(self):
         """
@@ -80,6 +115,13 @@ class PrometheusRulesManager:
         """
         with open(file_path, 'r', encoding='utf-8') as file:
             new_rules = yaml.safe_load(file)
+            # 修改new_rules中集群名称为当前集群名称
+            cluster_name = self.get_cluster_name()
+            if cluster_name:
+                for rule in new_rules['groups'][0]['rules']:
+                    if 'labels' not in rule:
+                        rule['labels'] = {}
+                    rule['labels']['env'] = cluster_name
             # 校验new_rules中的所有规则名称不应该在原有的规则文件中存在
             try:
                 rules = new_rules['groups'][0]['rules']
@@ -96,6 +138,7 @@ class PrometheusRulesManager:
                 self.rules['groups'][0]['rules'][rule_index:rule_index] = new_rules['groups'][0]['rules']
             else:
                 self.rules['groups'][0]['rules'].extend(new_rules['groups'][0]['rules'])
+        self.save_rules()
 
     def delete_alert_rule(self, alert_name):
         rule_index = self.find_alert_index(alert_name)
